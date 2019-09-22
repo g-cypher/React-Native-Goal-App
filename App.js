@@ -1,35 +1,48 @@
 import React, { useState } from 'react';
 import { 
   StyleSheet, 
-  Text, 
   View, 
   Button, 
-  TextInput, 
-  FlatList, 
-  ScrollView 
+  FlatList 
 } from 'react-native';
 
 import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState('');
   const [courseGoals, setCourseGoals] = useState([]);
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  function handleGoalText(enteredText) {
-    setEnteredGoal(enteredText);
+  const addGoalHandler = goalTitle => {
+    setCourseGoals([...courseGoals, { id: Math.random().toString(), value: goalTitle }]);
+    setIsAddMode(false);
   }
 
-  const addGoalHandler = () => {
-    setCourseGoals([...courseGoals, { key: Math.random().toString(), value: enteredGoal }]);
+  const removeGoalHandler = goalId => {
+    setCourseGoals(courseGoals => {
+      return courseGoals.filter((goal) => goal.id !== goalId);
+    });
   }
+
+  const cancelAddGoalHandler = () => {
+    setIsAddMode(false);
+  };
 
   return (
     <View style={styles.screen}>
-      
+      <Button title="Add a Goal" onPress={() => setIsAddMode(true)}/>
+      <GoalInput visible={isAddMode} onAddGoal={addGoalHandler} cancelGoal={cancelAddGoalHandler}/>
       <FlatList 
-        keyExtractor={(item, index) => item.key }
+        keyExtractor={(item, index) => item.id }
         data={courseGoals} 
-        renderItem={itemData => ( <GoalItem title={itemData.item.value}/>)}/>
+        renderItem={itemData => ( 
+          <GoalItem 
+            id={itemData.item.id}
+            onDelete={removeGoalHandler} 
+            title={itemData.item.value}
+            />
+          )}
+        />
     </View>
   );
 }
